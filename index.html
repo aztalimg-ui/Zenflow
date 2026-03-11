@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="ZenFlow — Premium AI-powered task planning and productivity platform with Kanban boards, analytics, calendar, and Pomodoro timer.">
+    <title>ZenFlow — Smart Task Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ═══════════════ SPLASH SCREEN ═══════════════ -->
+    <div id="splash" class="splash">
+        <canvas id="particleCanvas"></canvas>
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 80 80" fill="none">
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#818cf8" />
+                                <stop offset="50%" style="stop-color:#6366f1" />
+                                <stop offset="100%" style="stop-color:#4f46e5" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="8" y="8" width="64" height="64" rx="16" fill="url(#logoGrad)" opacity="0.15" />
+                        <rect x="4" y="4" width="64" height="64" rx="16" fill="url(#logoGrad)" opacity="0.3" />
+                        <rect x="0" y="0" width="64" height="64" rx="16" fill="url(#logoGrad)" />
+                        <path d="M18 32L28 42L46 22" stroke="white" stroke-width="5" stroke-linecap="round"
+                            stroke-linejoin="round" class="check-path" />
+                        <circle cx="50" cy="46" r="8" fill="rgba(255,255,255,0.2)" />
+                        <path d="M50 42V50M50 50H46M50 50L54 46" stroke="white" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <h1 class="splash-title">
+                    <span class="letter" style="--i:0">Z</span>
+                    <span class="letter" style="--i:1">e</span>
+                    <span class="letter" style="--i:2">n</span>
+                    <span class="letter" style="--i:3">F</span>
+                    <span class="letter" style="--i:4">l</span>
+                    <span class="letter" style="--i:5">o</span>
+                    <span class="letter" style="--i:6">w</span>
+                </h1>
+            </div>
+            <p class="splash-tagline" data-i18n="splash_tagline">Orchestrate your productivity</p>
+            <div class="splash-loader">
+                <div class="loader-bar">
+                    <div class="loader-fill"></div>
+                </div>
+                <span class="loader-text" data-i18n="splash_loading">Initializing workspace...</span>
+            </div>
+        </div>
+        <div class="splash-grid"></div>
+    </div>
+
+    <!-- ═══════════════ MAIN APP ═══════════════ -->
+    <div id="app" class="app hidden">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg viewBox="0 0 64 64" fill="none" width="32" height="32">
+                        <rect width="64" height="64" rx="16" fill="url(#sideLogoGrad)" />
+                        <defs>
+                            <linearGradient id="sideLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#818cf8" />
+                                <stop offset="100%" style="stop-color:#4f46e5" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M18 32L28 42L46 22" stroke="white" stroke-width="5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    <span class="sidebar-brand">ZenFlow</span>
+                </div>
+                <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    <span data-i18n="nav_dashboard">Dashboard</span>
+                </button>
+                <button class="nav-item" data-view="kanban" id="nav-kanban">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="5" height="18" rx="1" />
+                        <rect x="10" y="3" width="5" height="12" rx="1" />
+                        <rect x="17" y="3" width="5" height="15" rx="1" />
+                    </svg>
+                    <span data-i18n="nav_kanban">Kanban Board</span>
+                </button>
+                <button class="nav-item" data-view="calendar" id="nav-calendar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span data-i18n="nav_calendar">Calendar</span>
+                </button>
+                <button class="nav-item" data-view="analytics" id="nav-analytics">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 20V10M12 20V4M6 20v-6" />
+                    </svg>
+                    <span data-i18n="nav_analytics">Analytics</span>
+                </button>
+                <button class="nav-item" data-view="pomodoro" id="nav-pomodoro">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span data-i18n="nav_focus">Focus Timer</span>
+                </button>
+                <button class="nav-item" data-view="aiplanner" id="nav-aiplanner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2a4 4 0 014 4c0 1.95-1.4 3.58-3.25 3.93L12 10l-.75-.07A4.001 4.001 0 0112 2z" />
+                        <path d="M8 14s-4 0-4 4 4 4 4 4h8s4 0 4-4-4-4-4-4" />
+                        <circle cx="9" cy="19" r="1" />
+                        <circle cx="15" cy="19" r="1" />
+                        <path d="M12 14v3" />
+                    </svg>
+                    <span data-i18n="nav_ai">AI Planner</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-categories">
+                <div class="sidebar-section-title">
+                    <span data-i18n="categories">Categories</span>
+                    <button id="addCategoryBtn" class="icon-btn" aria-label="Add Category">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="categoryList" class="category-list"></div>
+            </div>
+
+            <div class="sidebar-footer">
+                <!-- Language Switcher -->
+                <div class="lang-switcher" id="langSwitcher">
+                    <button class="lang-btn" id="langToggleBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <path
+                                d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                        </svg>
+                        <span id="currentLangLabel">English</span>
+                        <svg class="lang-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <button data-lang="en"><span class="lang-flag">🇬🇧</span> English</button>
+                        <button data-lang="ru"><span class="lang-flag">🇷🇺</span> Русский</button>
+                        <button data-lang="uz"><span class="lang-flag">🇺🇿</span> O'zbekcha</button>
+                        <button data-lang="tr"><span class="lang-flag">🇹🇷</span> Türkçe</button>
+                        <button data-lang="es"><span class="lang-flag">🇪🇸</span> Español</button>
+                        <button data-lang="zh"><span class="lang-flag">🇨🇳</span> 中文</button>
+                    </div>
+                </div>
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                    <span data-i18n="toggle_theme">Toggle Theme</span>
+                </button>
+                <button id="exportBtn" class="nav-item" aria-label="Export Data">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                    </svg>
+                    <span data-i18n="export_data">Export Data</span>
+                </button>
+                <button id="importBtn" class="nav-item" aria-label="Import Data">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                    </svg>
+                    <span data-i18n="import_data">Import Data</span>
+                </button>
+                <input type="file" id="importFile" accept=".json" hidden>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- TOP BAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button id="mobileSidebarToggle" class="mobile-menu-btn" aria-label="Menu">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <div class="search-box" id="searchBox">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="M21 21l-4.35-4.35" />
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="Search tasks... (Ctrl+K)"
+                            data-i18n-placeholder="search_placeholder" autocomplete="off">
+                        <kbd class="search-kbd">Ctrl+K</kbd>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-stats">
+                        <div class="stat-chip" id="statTodo">
+                            <span class="stat-dot todo"></span>
+                            <span id="todoCount">0</span> <span data-i18n="to_do">To Do</span>
+                        </div>
+                        <div class="stat-chip" id="statProgress">
+                            <span class="stat-dot progress"></span>
+                            <span id="progressCount">0</span> <span data-i18n="in_progress">In Progress</span>
+                        </div>
+                        <div class="stat-chip" id="statDone">
+                            <span class="stat-dot done"></span>
+                            <span id="doneCount">0</span> <span data-i18n="done">Done</span>
+                        </div>
+                    </div>
+                    <button id="addTaskBtn" class="btn btn-primary" aria-label="Add Task">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        <span data-i18n="new_task">New Task</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ═══ DASHBOARD VIEW ═══ -->
+            <section id="view-dashboard" class="view active">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Good <span id="greeting"></span>, <span id="userName">there</span> 👋
+                        </h1>
+                        <p class="view-subtitle" id="dateDisplay"></p>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Quick Stats -->
+                    <div class="dash-card stat-card" id="dashTotalTasks">
+                        <div class="stat-card-icon" style="--accent: var(--indigo)">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M9 11l3 3L22 4" />
+                                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                            </svg>
+                        </div>
+                        <div class="stat-card-info">
+                            <span class="stat-card-value" id="dashTotalValue">0</span>
+                            <span class="stat-card-label" data-i18n="total_tasks">Total Tasks</span>
+                        </div>
+                    </div>
+                    <div class="dash-card stat-card" id="dashCompleted">
+                        <div class="stat-card-icon" style="--accent: var(--emerald)">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
+                        </div>
+                        <div class="stat-card-info">
+                            <span class="stat-card-value" id="dashCompletedValue">0</span>
+                            <span class="stat-card-label" data-i18n="completed">Completed</span>
+                        </div>
+                    </div>
+                    <div class="dash-card stat-card" id="dashStreak">
+                        <div class="stat-card-icon" style="--accent: var(--amber)">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                            </svg>
+                        </div>
+                        <div class="stat-card-info">
+                            <span class="stat-card-value" id="dashStreakValue">0</span>
+                            <span class="stat-card-label" data-i18n="day_streak">Day Streak 🔥</span>
+                        </div>
+                    </div>
+                    <div class="dash-card stat-card" id="dashFocusTime">
+                        <div class="stat-card-icon" style="--accent: var(--rose)">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                        </div>
+                        <div class="stat-card-info">
+                            <span class="stat-card-value" id="dashFocusValue">0h</span>
+                            <span class="stat-card-label" data-i18n="focus_time">Focus Time</span>
+                        </div>
+                    </div>
+
+                    <!-- Recent Tasks -->
+                    <div class="dash-card wide-card">
+                        <div class="dash-card-header">
+                            <h3 data-i18n="recent_tasks">📋 Recent Tasks</h3>
+                            <button class="btn btn-ghost btn-sm" data-view="kanban" onclick="app.switchView('kanban')"
+                                data-i18n="view_all">View All →</button>
+                        </div>
+                        <div id="recentTasks" class="recent-tasks-list"></div>
+                        <div id="emptyRecent" class="empty-state mini hidden">
+                            <p data-i18n="no_tasks_yet">No tasks yet. Create your first task! ✨</p>
+                        </div>
+                    </div>
+
+                    <!-- Mini Chart -->
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <h3 data-i18n="this_week">📊 This Week</h3>
+                        </div>
+                        <canvas id="dashWeekChart"></canvas>
+                    </div>
+
+                    <!-- Upcoming Deadlines -->
+                    <div class="dash-card wide-card">
+                        <div class="dash-card-header">
+                            <h3 data-i18n="upcoming_deadlines">⏰ Upcoming Deadlines</h3>
+                        </div>
+                        <div id="upcomingDeadlines" class="upcoming-list"></div>
+                        <div id="emptyDeadlines" class="empty-state mini hidden">
+                            <p data-i18n="no_upcoming">No upcoming deadlines. You're all clear! 🎉</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ KANBAN VIEW ═══ -->
+            <section id="view-kanban" class="view">
+                <div class="view-header">
+                    <h1 class="view-title" data-i18n="kanban_title">Kanban Board</h1>
+                    <div class="view-actions">
+                        <div class="filter-group">
+                            <select id="filterPriority" class="filter-select">
+                                <option value="" data-i18n="all_priorities">All Priorities</option>
+                                <option value="critical" data-i18n="critical">🔴 Critical</option>
+                                <option value="high" data-i18n="high">🟠 High</option>
+                                <option value="medium" data-i18n="medium">🟡 Medium</option>
+                                <option value="low" data-i18n="low">🟢 Low</option>
+                            </select>
+                            <select id="filterCategory" class="filter-select">
+                                <option value="" data-i18n="all_categories">All Categories</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="kanban-board" id="kanbanBoard">
+                    <div class="kanban-column" data-status="todo" id="col-todo">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <span class="column-dot todo"></span>
+                                <h3 data-i18n="to_do">To Do</h3>
+                                <span class="column-count" id="colTodoCount">0</span>
+                            </div>
+                            <button class="icon-btn add-col-task" data-status="todo" aria-label="Add task">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="column-tasks" id="todoTasks"></div>
+                    </div>
+                    <div class="kanban-column" data-status="inprogress" id="col-inprogress">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <span class="column-dot progress"></span>
+                                <h3 data-i18n="in_progress">In Progress</h3>
+                                <span class="column-count" id="colProgressCount">0</span>
+                            </div>
+                            <button class="icon-btn add-col-task" data-status="inprogress" aria-label="Add task">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="column-tasks" id="inprogressTasks"></div>
+                    </div>
+                    <div class="kanban-column" data-status="done" id="col-done">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <span class="column-dot done"></span>
+                                <h3 data-i18n="done">Done</h3>
+                                <span class="column-count" id="colDoneCount">0</span>
+                            </div>
+                            <button class="icon-btn add-col-task" data-status="done" aria-label="Add task">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="column-tasks" id="doneTasks"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ CALENDAR VIEW ═══ -->
+            <section id="view-calendar" class="view">
+                <div class="view-header">
+                    <h1 class="view-title" data-i18n="calendar_title">Calendar</h1>
+                    <div class="view-actions">
+                        <button id="calPrev" class="icon-btn" aria-label="Previous month">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M15 18l-6-6 6-6" />
+                            </svg>
+                        </button>
+                        <h2 id="calMonthYear" class="cal-month-title"></h2>
+                        <button id="calNext" class="icon-btn" aria-label="Next month">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M9 18l6-6-6-6" />
+                            </svg>
+                        </button>
+                        <button id="calToday" class="btn btn-ghost btn-sm" data-i18n="cal_today">Today</button>
+                    </div>
+                </div>
+                <div class="calendar-container">
+                    <div class="calendar-grid">
+                        <div class="cal-header-cell" data-i18n="mon">Mon</div>
+                        <div class="cal-header-cell" data-i18n="tue">Tue</div>
+                        <div class="cal-header-cell" data-i18n="wed">Wed</div>
+                        <div class="cal-header-cell" data-i18n="thu">Thu</div>
+                        <div class="cal-header-cell" data-i18n="fri">Fri</div>
+                        <div class="cal-header-cell weekend" data-i18n="sat">Sat</div>
+                        <div class="cal-header-cell weekend" data-i18n="sun">Sun</div>
+                    </div>
+                    <div id="calendarDays" class="calendar-days"></div>
+                </div>
+                <div id="calDayDetail" class="cal-day-detail hidden">
+                    <h3 id="calDetailDate"></h3>
+                    <div id="calDetailTasks"></div>
+                </div>
+            </section>
+
+            <!-- ═══ ANALYTICS VIEW ═══ -->
+            <section id="view-analytics" class="view">
+                <div class="view-header">
+                    <h1 class="view-title" data-i18n="analytics_title">Analytics</h1>
+                    <div class="view-actions">
+                        <select id="analyticsPeriod" class="filter-select">
+                            <option value="week" data-i18n="this_week_period">This Week</option>
+                            <option value="month" data-i18n="this_month">This Month</option>
+                            <option value="all" data-i18n="all_time">All Time</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="analytics-grid">
+                    <div class="analytics-card large-card">
+                        <h3 data-i18n="completion_trend">📈 Task Completion Trend</h3>
+                        <canvas id="completionChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3 data-i18n="status_breakdown">🎯 Status Breakdown</h3>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3 data-i18n="priority_dist">⚡ Priority Distribution</h3>
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3 data-i18n="category_dist">🏷️ Category Distribution</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3 data-i18n="focus_sessions">🍅 Focus Sessions</h3>
+                        <canvas id="pomodoroChart"></canvas>
+                    </div>
+                    <div class="analytics-card large-card">
+                        <h3 data-i18n="activity_heatmap">🗓️ Activity Heatmap</h3>
+                        <div id="heatmapContainer" class="heatmap-container"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ POMODORO VIEW ═══ -->
+            <section id="view-pomodoro" class="view">
+                <div class="pomodoro-container">
+                    <div class="pomodoro-card">
+                        <div class="pomodoro-header-row">
+                            <div class="pomodoro-tabs">
+                                <button class="pomo-tab active" data-duration="25" data-mode="focus"
+                                    data-i18n="focus">Focus</button>
+                                <button class="pomo-tab" data-duration="5" data-mode="short"
+                                    data-i18n="short_break">Short Break</button>
+                                <button class="pomo-tab" data-duration="15" data-mode="long" data-i18n="long_break">Long
+                                    Break</button>
+                            </div>
+                            <button id="pomoSettingsBtn" class="icon-btn pomo-settings-btn" aria-label="Timer Settings">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path
+                                        d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Pomodoro Settings Panel -->
+                        <div id="pomoSettingsPanel" class="pomo-settings-panel hidden">
+                            <div class="pomo-settings-grid">
+                                <div class="pomo-setting-item">
+                                    <label data-i18n="pomo_focus_duration">Focus (min)</label>
+                                    <div class="pomo-setting-input-row">
+                                        <button class="pomo-adj-btn" data-target="pomoFocusInput"
+                                            data-step="-1">−</button>
+                                        <input type="number" id="pomoFocusInput" class="pomo-setting-input" value="25"
+                                            min="1" max="120">
+                                        <button class="pomo-adj-btn" data-target="pomoFocusInput"
+                                            data-step="1">+</button>
+                                    </div>
+                                </div>
+                                <div class="pomo-setting-item">
+                                    <label data-i18n="pomo_short_break_duration">Short Break (min)</label>
+                                    <div class="pomo-setting-input-row">
+                                        <button class="pomo-adj-btn" data-target="pomoShortInput"
+                                            data-step="-1">−</button>
+                                        <input type="number" id="pomoShortInput" class="pomo-setting-input" value="5"
+                                            min="1" max="60">
+                                        <button class="pomo-adj-btn" data-target="pomoShortInput"
+                                            data-step="1">+</button>
+                                    </div>
+                                </div>
+                                <div class="pomo-setting-item">
+                                    <label data-i18n="pomo_long_break_duration">Long Break (min)</label>
+                                    <div class="pomo-setting-input-row">
+                                        <button class="pomo-adj-btn" data-target="pomoLongInput"
+                                            data-step="-1">−</button>
+                                        <input type="number" id="pomoLongInput" class="pomo-setting-input" value="15"
+                                            min="1" max="60">
+                                        <button class="pomo-adj-btn" data-target="pomoLongInput"
+                                            data-step="1">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="pomoSaveSettings" class="btn btn-primary btn-sm pomo-save-settings-btn"
+                                data-i18n="pomo_save_settings">Save Settings</button>
+                        </div>
+
+                        <div class="pomodoro-timer-ring">
+                            <svg class="timer-svg" viewBox="0 0 260 260">
+                                <circle class="timer-bg" cx="130" cy="130" r="120" />
+                                <circle class="timer-progress" cx="130" cy="130" r="120" id="timerProgress" />
+                            </svg>
+                            <div class="timer-display">
+                                <span id="timerMinutes">25</span>
+                                <span class="timer-colon">:</span>
+                                <span id="timerSeconds">00</span>
+                            </div>
+                        </div>
+                        <div class="pomodoro-controls">
+                            <button id="pomoStart" class="btn btn-primary btn-lg">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                </svg>
+                                <span data-i18n="start_focus">Start Focus</span>
+                            </button>
+                            <button id="pomoReset" class="btn btn-ghost btn-lg">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="1 4 1 10 7 10" />
+                                    <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+                                </svg>
+                                <span data-i18n="reset">Reset</span>
+                            </button>
+                        </div>
+                        <div class="pomodoro-task-select">
+                            <label data-i18n="working_on">Working on:</label>
+                            <select id="pomoTaskSelect" class="filter-select">
+                                <option value="" data-i18n="no_task_selected">No task selected</option>
+                            </select>
+                        </div>
+                        <div class="pomodoro-stats">
+                            <div class="pomo-stat">
+                                <span class="pomo-stat-value" id="pomoSessionsToday">0</span>
+                                <span class="pomo-stat-label" data-i18n="sessions_today">Sessions Today</span>
+                            </div>
+                            <div class="pomo-stat">
+                                <span class="pomo-stat-value" id="pomoTotalFocus">0h</span>
+                                <span class="pomo-stat-label" data-i18n="total_focus">Total Focus</span>
+                            </div>
+                            <div class="pomo-stat">
+                                <span class="pomo-stat-value" id="pomoTotalSessions">0</span>
+                                <span class="pomo-stat-label" data-i18n="all_sessions">All Sessions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ AI PLANNER VIEW ═══ -->
+            <section id="view-aiplanner" class="view">
+                <div class="ai-container">
+                    <!-- AI Header -->
+                    <div class="ai-header">
+                        <div class="ai-header-left">
+                            <div class="ai-avatar">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path
+                                        d="M12 2a4 4 0 014 4c0 1.95-1.4 3.58-3.25 3.93L12 10l-.75-.07A4.001 4.001 0 0112 2z" />
+                                    <path d="M8 14s-4 0-4 4 4 4 4 4h8s4 0 4-4-4-4-4-4" />
+                                    <circle cx="9" cy="19" r="1" />
+                                    <circle cx="15" cy="19" r="1" />
+                                    <path d="M12 14v3" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="ai-title" data-i18n="ai_title">AI Planner</h1>
+                                <p class="ai-subtitle" data-i18n="ai_subtitle">Your intelligent productivity assistant
+                                </p>
+                            </div>
+                        </div>
+                        <div class="ai-header-right">
+                            <div id="aiConnectedBadge" class="ai-connected-badge hidden">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                <span data-i18n="ai_connected">Connected</span>
+                            </div>
+                            <button id="aiSettingsBtn" class="btn btn-ghost btn-sm" aria-label="Settings">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path
+                                        d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+                                </svg>
+                            </button>
+                            <button id="aiClearBtn" class="btn btn-ghost btn-sm" aria-label="Clear chat">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6" />
+                                    <path
+                                        d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Groq Connect Panel (hidden by default) -->
+                    <div id="aiKeyPanel" class="ai-key-panel hidden">
+                        <div class="ai-key-inner">
+                            <div class="ai-connect-steps">
+                                <div class="ai-step">
+                                    <div class="ai-step-num">1</div>
+                                    <div class="ai-step-text">
+                                        <span data-i18n="ai_step_1">Open Groq Console and create a free account</span>
+                                    </div>
+                                </div>
+                                <div class="ai-step">
+                                    <div class="ai-step-num">2</div>
+                                    <div class="ai-step-text">
+                                        <span data-i18n="ai_step_2">Go to "API Keys" and click "Create API Key" — it's
+                                            free</span>
+                                    </div>
+                                </div>
+                                <div class="ai-step">
+                                    <div class="ai-step-num">3</div>
+                                    <div class="ai-step-text">
+                                        <span data-i18n="ai_step_3">Paste the key below to connect</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="ai-google-btn"
+                                id="aiGoogleBtn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                                </svg>
+                                <span data-i18n="ai_open_google">Open Groq Console</span>
+                            </a>
+                            <div class="ai-key-input-row">
+                                <input type="password" id="aiKeyInput" data-i18n-placeholder="ai_paste_key"
+                                    placeholder="Paste your key here..." autocomplete="off">
+                                <button id="aiKeySaveBtn" class="btn btn-primary btn-sm"
+                                    data-i18n="ai_connect_btn">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="aiMessages" class="ai-messages">
+                        <div class="ai-welcome">
+                            <div class="ai-welcome-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                    <path d="M2 17l10 5 10-5" />
+                                    <path d="M2 12l10 5 10-5" />
+                                </svg>
+                            </div>
+                            <h2 data-i18n="ai_welcome_title">What can I help you plan?</h2>
+                            <p data-i18n="ai_welcome_desc">Describe your goal and I'll create a detailed action plan
+                                with steps, deadlines, and priorities.</p>
+                            <div class="ai-suggestions">
+                                <button class="ai-suggestion-chip" onclick="app.aiSendSuggestion(this)"
+                                    data-i18n="ai_suggest_1">Plan a website launch</button>
+                                <button class="ai-suggestion-chip" onclick="app.aiSendSuggestion(this)"
+                                    data-i18n="ai_suggest_2">Organize my study schedule</button>
+                                <button class="ai-suggestion-chip" onclick="app.aiSendSuggestion(this)"
+                                    data-i18n="ai_suggest_3">Create a fitness routine</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="ai-input-area">
+                        <div class="ai-input-box">
+                            <textarea id="aiInput" rows="1" placeholder="Describe your goal or ask for a plan..."
+                                data-i18n-placeholder="ai_input_placeholder"></textarea>
+                            <button id="aiSendBtn" class="ai-send-btn" aria-label="Send">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="ai-disclaimer" data-i18n="ai_disclaimer">AI can make mistakes. Review plans before
+                            acting on them.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ═══════════════ TASK MODAL ═══════════════ -->
+    <div id="taskModal" class="modal-overlay hidden">
+        <div class="modal" role="dialog" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <h2 id="modalTitle" data-i18n="new_task_modal">New Task</h2>
+                <button id="modalClose" class="icon-btn" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="taskForm" class="modal-body">
+                <div class="form-group">
+                    <label for="taskTitle" data-i18n="title_label">Title *</label>
+                    <input type="text" id="taskTitle" required placeholder="What needs to be done?"
+                        data-i18n-placeholder="title_placeholder" maxlength="100" autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="taskDesc" data-i18n="description">Description</label>
+                    <textarea id="taskDesc" rows="3" placeholder="Add details, notes, or context..."
+                        data-i18n-placeholder="desc_placeholder"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskPriority" data-i18n="priority">Priority</label>
+                        <select id="taskPriority">
+                            <option value="low">🟢 Low</option>
+                            <option value="medium" selected>🟡 Medium</option>
+                            <option value="high">🟠 High</option>
+                            <option value="critical">🔴 Critical</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskStatus" data-i18n="status">Status</label>
+                        <select id="taskStatus">
+                            <option value="todo">To Do</option>
+                            <option value="inprogress">In Progress</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskDue" data-i18n="due_date">Due Date</label>
+                        <input type="date" id="taskDue">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskCategory" data-i18n="category">Category</label>
+                        <select id="taskCategory">
+                            <option value="">No Category</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="taskTags">Tags <small data-i18n="tags_hint">(comma separated)</small></label>
+                    <input type="text" id="taskTags" placeholder="e.g. urgent, frontend, bug"
+                        data-i18n-placeholder="tags_placeholder">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="subtasks">Subtasks</label>
+                    <div id="subtaskList" class="subtask-list"></div>
+                    <div class="subtask-add">
+                        <input type="text" id="subtaskInput" placeholder="Add a subtask..."
+                            data-i18n-placeholder="add_subtask_placeholder">
+                        <button type="button" id="addSubtaskBtn" class="icon-btn" aria-label="Add subtask">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" id="taskId">
+            </form>
+            <div class="modal-footer">
+                <button type="button" id="deleteTaskBtn" class="btn btn-danger hidden">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                    Delete
+                </button>
+                <div class="modal-footer-right">
+                    <button type="button" id="cancelTaskBtn" class="btn btn-ghost"
+                        data-i18n="cancel_btn">Cancel</button>
+                    <button type="submit" form="taskForm" id="saveTaskBtn" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                            <polyline points="17 21 17 13 7 13 7 21" />
+                            <polyline points="7 3 7 8 15 8" />
+                        </svg>
+                        Save Task
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ CATEGORY MODAL ═══════════════ -->
+    <div id="categoryModal" class="modal-overlay hidden">
+        <div class="modal modal-sm" role="dialog" aria-labelledby="catModalTitle">
+            <div class="modal-header">
+                <h2 id="catModalTitle" data-i18n="new_category">New Category</h2>
+                <button id="catModalClose" class="icon-btn" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="categoryForm" class="modal-body">
+                <div class="form-group">
+                    <label for="catName" data-i18n="cat_name_label">Name *</label>
+                    <input type="text" id="catName" required placeholder="e.g. Work, Personal, Health"
+                        data-i18n-placeholder="cat_name_placeholder" maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="color">Color</label>
+                    <div class="color-picker" id="colorPicker">
+                        <button type="button" class="color-swatch active" data-color="#6366f1"
+                            style="--c:#6366f1"></button>
+                        <button type="button" class="color-swatch" data-color="#8b5cf6" style="--c:#8b5cf6"></button>
+                        <button type="button" class="color-swatch" data-color="#ec4899" style="--c:#ec4899"></button>
+                        <button type="button" class="color-swatch" data-color="#f43f5e" style="--c:#f43f5e"></button>
+                        <button type="button" class="color-swatch" data-color="#f97316" style="--c:#f97316"></button>
+                        <button type="button" class="color-swatch" data-color="#eab308" style="--c:#eab308"></button>
+                        <button type="button" class="color-swatch" data-color="#22c55e" style="--c:#22c55e"></button>
+                        <button type="button" class="color-swatch" data-color="#14b8a6" style="--c:#14b8a6"></button>
+                        <button type="button" class="color-swatch" data-color="#06b6d4" style="--c:#06b6d4"></button>
+                        <button type="button" class="color-swatch" data-color="#3b82f6" style="--c:#3b82f6"></button>
+                    </div>
+                </div>
+                <input type="hidden" id="catId">
+            </form>
+            <div class="modal-footer">
+                <button type="button" id="deleteCatBtn" class="btn btn-danger hidden"
+                    data-i18n="delete_btn">Delete</button>
+                <div class="modal-footer-right">
+                    <button type="button" id="cancelCatBtn" class="btn btn-ghost" data-i18n="cancel_btn">Cancel</button>
+                    <button type="submit" form="categoryForm" class="btn btn-primary" data-i18n="save_btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ TOAST CONTAINER ═══════════════ -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ═══════════════ KEYBOARD SHORTCUTS MODAL ═══════════════ -->
+    <div id="shortcutsModal" class="modal-overlay hidden">
+        <div class="modal modal-md" role="dialog">
+            <div class="modal-header">
+                <h2 data-i18n="keyboard_shortcuts">⌨️ Keyboard Shortcuts</h2>
+                <button class="icon-btn" onclick="document.getElementById('shortcutsModal').classList.add('hidden')"
+                    aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body shortcuts-grid">
+                <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>K</kbd><span data-i18n="shortcut_search">Search
+                        Tasks</span></div>
+                <div class="shortcut-item"><kbd>N</kbd><span data-i18n="shortcut_new_task">New Task</span></div>
+                <div class="shortcut-item"><kbd>1</kbd>-<kbd>6</kbd><span data-i18n="shortcut_switch_views">Switch
+                        Views</span></div>
+                <div class="shortcut-item"><kbd>D</kbd><span data-i18n="shortcut_dark_mode">Toggle Dark Mode</span>
+                </div>
+                <div class="shortcut-item"><kbd>Esc</kbd><span data-i18n="shortcut_close">Close Modal</span></div>
+                <div class="shortcut-item"><kbd>?</kbd><span data-i18n="shortcut_show">Show Shortcuts</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
