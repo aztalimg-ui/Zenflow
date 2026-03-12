@@ -657,6 +657,8 @@ body {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     gap: 16px;
+    position: relative;
+    z-index: 100;
 }
 
 .topbar-left {

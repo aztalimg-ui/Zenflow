@@ -43,6 +43,16 @@ const i18n = {
             in_progress: 'In Progress',
             done: 'Done',
             new_task: 'New Task',
+            
+            // Dropdown menu
+            dropdown_history: 'History',
+            dropdown_personal: 'Personal Context',
+            dropdown_theme: 'Toggle Theme',
+            dropdown_subscription: 'Subscription',
+            dropdown_upgrade: 'Upgrade',
+            dropdown_notebook: 'Notebooks',
+            dropdown_feedback: 'Feedback',
+            dropdown_help: 'Help',
 
             // Dashboard
             greeting_morning: 'morning',
@@ -244,6 +254,17 @@ const i18n = {
             in_progress: 'В процессе',
             done: 'Готово',
             new_task: 'Новая задача',
+            
+            // Dropdown menu
+            dropdown_history: 'История чатов',
+            dropdown_personal: 'Настройки',
+            dropdown_theme: 'Сменить тему',
+            dropdown_subscription: 'Моя подписка',
+            dropdown_upgrade: 'Улучшить аккаунт',
+            dropdown_notebook: 'Блокнот',
+            dropdown_feedback: 'Написать нам',
+            dropdown_help: 'Помощь',
+
             greeting_morning: 'утро',
             greeting_afternoon: 'день',
             greeting_evening: 'вечер',
