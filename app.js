@@ -247,6 +247,32 @@ const app = {
         }));
         // Analytics period
         $('#analyticsPeriod')?.addEventListener('change', () => this.updateCharts());
+        
+        // Profile Menu Dropdown
+        const profileBtn = $('#profileBtn');
+        const profileDropdown = $('#profileDropdown');
+        if (profileBtn && profileDropdown) {
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+            
+            // Handle Theme toggle from inside dropdown
+            const popupThemeToggle = $('#dropdownThemeToggle');
+            if(popupThemeToggle) {
+                popupThemeToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleTheme();
+                });
+            }
+        }
     },
 
     toggleMobileSidebar() {
@@ -1223,6 +1249,16 @@ const app = {
 - Suggest time estimates and priorities
 - Break complex goals into phases
 - Be concise but thorough
+
+IMPORTANT RULES FOR BUGS/ERRORS:
+If the user reports an error, bug, or technical problem:
+1. First, try to suggest troubleshooting steps.
+2. If it's a fundamental logic bug or unresolvable issue, explicitly create a bug report for the creator by outputting EXACTLY this format somewhere in your response:
+[BUG_REPORT]
+Title: [A short title of the bug]
+Description: [A brief description of what is broken and needs fixing]
+[/BUG_REPORT]
+
 Respond in the same language the user writes in.${taskContext}`;
 
             const apiMessages = [
@@ -1379,6 +1415,21 @@ Respond in the same language the user writes in.${taskContext}`;
 
     aiRenderMarkdown(text) {
         return text
+            // Bug Report blocks
+            .replace(/\[BUG_REPORT\]([\s\S]*?)\[\/BUG_REPORT\]/gi, (match, content) => {
+                const titleMatch = content.match(/Title:\s*(.+)/i);
+                const descMatch = content.match(/Description:\s*([\s\S]+)/i);
+                const title = titleMatch ? titleMatch[1].trim() : 'System Error';
+                const desc = descMatch ? descMatch[1].trim() : content.trim();
+                return `<div class="ai-bug-report">
+                    <div class="bug-report-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>BUG TICKET CREATED & SENT TO DEVELOPER</span>
+                    </div>
+                    <div class="bug-report-title">${title}</div>
+                    <div class="bug-report-desc">${desc}</div>
+                </div>`;
+            })
             // Code blocks
             .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
             // Inline code
