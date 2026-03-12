@@ -20,7 +20,9 @@ const Store = {
     streak: () => Store.get('streak', { count: 0, lastDate: null }),
     saveStreak: (s) => Store.set('streak', s),
     activity: () => Store.get('activity', {}),
-    saveActivity: (a) => Store.set('activity', a)
+    saveActivity: (a) => Store.set('activity', a),
+    aiThreads: () => Store.get('ai_threads', []),
+    saveAiThreads: (th) => Store.set('ai_threads', th)
 };
 
 // ──── UTILITY ────
@@ -66,7 +68,41 @@ const app = {
             this.initAI();
             this.initPomoSettings();
             i18n.applyTranslations();
+            this.initDeviceMode();
         }, 100);
+    },
+
+    // ──── DEVICE SWITCHER ────
+    initDeviceMode() {
+        const savedMode = Store.get('device_mode', 'desktop');
+        this.setDeviceMode(savedMode);
+
+        $$('.device-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const mode = e.currentTarget.dataset.device;
+                this.setDeviceMode(mode);
+            });
+        });
+    },
+
+    setDeviceMode(mode) {
+        document.body.classList.remove('view-mobile', 'view-tablet');
+        
+        if (mode === 'mobile') {
+            document.body.classList.add('view-mobile');
+        } else if (mode === 'tablet') {
+            document.body.classList.add('view-tablet');
+        }
+
+        $$('.device-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.device === mode);
+        });
+
+        Store.set('device_mode', mode);
+
+        if (this.currentView === 'analytics') {
+            setTimeout(() => this.updateCharts(), 300);
+        }
     },
 
     // ──── SPLASH ────
@@ -1111,8 +1147,17 @@ const app = {
                 toast(i18n.t('ai_key_saved'), 'success');
             }
         });
+        // History Modal
+        $('#aiHistoryBtn')?.addEventListener('click', () => {
+            this.aiRenderHistoryList();
+            $('#aiHistoryModal').classList.remove('hidden');
+        });
+        $('#aiHistoryClose')?.addEventListener('click', () => {
+            $('#aiHistoryModal').classList.add('hidden');
+        });
         // Clear chat
         $('#aiClearBtn').addEventListener('click', () => {
+            this.aiArchiveCurrentThread();
             this.aiMessages = [];
             localStorage.removeItem('zf_ai_history');
             this.aiRenderMessages();
@@ -1357,6 +1402,76 @@ Respond in the same language the user writes in.${taskContext}`;
             .replace(/\n/g, '<br>')
             .replace(/^(.+)/, '<p>$1')
             .replace(/(.+)$/, '$1</p>');
+    },
+
+    aiArchiveCurrentThread() {
+        if (!this.aiMessages || this.aiMessages.length === 0) return;
+        const threads = Store.aiThreads();
+        const firstUserMsg = this.aiMessages.find(m => m.role === 'user');
+        const title = firstUserMsg ? firstUserMsg.content.substring(0, 40) + (firstUserMsg.content.length > 40 ? '...' : '') : 'New Chat';
+        
+        threads.unshift({
+            id: uid(),
+            title: title,
+            date: new Date().toISOString(),
+            messages: [...this.aiMessages]
+        });
+        Store.saveAiThreads(threads);
+    },
+
+    aiRenderHistoryList() {
+        const list = $('#aiHistoryList');
+        const empty = $('#aiHistoryEmpty');
+        const threads = Store.aiThreads();
+        
+        if (threads.length === 0) {
+            list.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+        }
+        
+        empty.classList.add('hidden');
+        list.innerHTML = threads.map(th => `
+            <div class="ai-history-item" onclick="app.aiRestoreThread('${th.id}')">
+                <div class="ai-history-info">
+                    <div class="ai-history-title">${this.esc(th.title)}</div>
+                    <div class="ai-history-date">${formatDate(th.date.split('T')[0])}</div>
+                </div>
+                <div class="ai-history-actions" onclick="event.stopPropagation()">
+                    <button class="icon-btn" onclick="app.aiDeleteThread('${th.id}')" aria-label="Delete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    aiRestoreThread(id) {
+        const threads = Store.aiThreads();
+        const thIndex = threads.findIndex(t => t.id === id);
+        if (thIndex === -1) return;
+        
+        // Archive current if it has messages
+        this.aiArchiveCurrentThread();
+        
+        const th = threads[thIndex];
+        this.aiMessages = [...th.messages];
+        localStorage.setItem('zf_ai_history', JSON.stringify(this.aiMessages));
+        
+        // Remove restored thread from history
+        threads.splice(thIndex, 1);
+        Store.saveAiThreads(threads);
+        
+        $('#aiHistoryModal').classList.add('hidden');
+        this.aiRenderMessages();
+        toast(i18n.t('ai_history_restored') || 'Chat restored', 'success');
+    },
+
+    aiDeleteThread(id) {
+        let threads = Store.aiThreads();
+        threads = threads.filter(t => t.id !== id);
+        Store.saveAiThreads(threads);
+        this.aiRenderHistoryList();
     },
 
     // ──── HELPERS ────

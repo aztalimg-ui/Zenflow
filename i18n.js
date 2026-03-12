@@ -220,6 +220,9 @@ const i18n = {
             ai_error_network_desc: 'Could not connect to the AI service. Please check your internet connection and try again.',
             ai_error_generic_title: 'Error',
             ai_error_generic_desc: 'Please check your API key in settings.',
+            ai_history_title: '📜 Chat History',
+            ai_history_empty: 'No chat history yet. Cleared chats will appear here.',
+            ai_history_restored: 'Chat restored',
         },
 
         // ──────────── RUSSIAN ────────────
@@ -397,6 +400,9 @@ const i18n = {
             ai_error_network_desc: 'Не удалось подключиться к сервису ИИ. Проверьте подключение к интернету и попробуйте снова.',
             ai_error_generic_title: 'Ошибка',
             ai_error_generic_desc: 'Проверьте ваш API ключ в настройках.',
+            ai_history_title: '📜 История чатов',
+            ai_history_empty: 'Истории пока нет. Старые чаты появятся здесь после очистки.',
+            ai_history_restored: 'Чат восстановлен',
         },
 
         // ──────────── UZBEK ────────────
@@ -574,6 +580,9 @@ const i18n = {
             ai_error_network_desc: 'AI xizmatiga ulanib bo\'lmadi. Internet aloqangizni tekshiring va qayta urinib ko\'ring.',
             ai_error_generic_title: 'Xato',
             ai_error_generic_desc: 'Sozlamalarda API kalitingizni tekshiring.',
+            ai_history_title: '📜 Chat tarixi',
+            ai_history_empty: 'Hozircha tarix yo\'q. Tozalangan chatlar bu yerda paydo bo\'ladi.',
+            ai_history_restored: 'Chat tiklandi',
         },
 
         // ──────────── TURKISH ────────────
@@ -751,6 +760,9 @@ const i18n = {
             ai_error_network_desc: 'AI servisine bağlanılamadı. İnternet bağlantınızı kontrol edin ve tekrar deneyin.',
             ai_error_generic_title: 'Hata',
             ai_error_generic_desc: 'Ayarlarda API anahtarınızı kontrol edin.',
+            ai_history_title: '📜 Sohbet Geçmişi',
+            ai_history_empty: 'Henüz geçmiş yok. Temizlenen sohbetler burada görünecektir.',
+            ai_history_restored: 'Sohbet geri yüklendi',
         },
 
         // ──────────── SPANISH ────────────
@@ -928,6 +940,9 @@ const i18n = {
             ai_error_network_desc: 'No se pudo conectar al servicio de IA. Verifica tu conexión a internet e inténtalo de nuevo.',
             ai_error_generic_title: 'Error',
             ai_error_generic_desc: 'Verifica tu clave API en la configuración.',
+            ai_history_title: '📜 Historial de Chat',
+            ai_history_empty: 'Aún no hay historial. Los chats borrados aparecerán aquí.',
+            ai_history_restored: 'Chat restaurado',
         },
 
         // ──────────── CHINESE ────────────
@@ -1105,6 +1120,9 @@ const i18n = {
             ai_error_network_desc: '无法连接到 AI 服务。请检查您的网络连接并重试。',
             ai_error_generic_title: '错误',
             ai_error_generic_desc: '请在设置中检查您的 API 密钥。',
+            ai_history_title: '📜 聊天记录',
+            ai_history_empty: '暂无记录。清除的聊天将显示在这里。',
+            ai_history_restored: '聊天已恢复',
         }
     },
 
