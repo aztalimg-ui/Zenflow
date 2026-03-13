@@ -233,6 +233,7 @@ const i18n = {
             ai_history_title: '📜 Chat History',
             ai_history_empty: 'No chat history yet. Cleared chats will appear here.',
             ai_history_restored: 'Chat restored',
+            feature_in_dev: 'Feature in development 🚧',
         },
 
         // ──────────── RUSSIAN ────────────
@@ -424,6 +425,7 @@ const i18n = {
             ai_history_title: '📜 История чатов',
             ai_history_empty: 'Истории пока нет. Старые чаты появятся здесь после очистки.',
             ai_history_restored: 'Чат восстановлен',
+            feature_in_dev: 'Функция в разработке 🚧',
         },
 
         // ──────────── UZBEK ────────────
@@ -604,6 +606,7 @@ const i18n = {
             ai_history_title: '📜 Chat tarixi',
             ai_history_empty: 'Hozircha tarix yo\'q. Tozalangan chatlar bu yerda paydo bo\'ladi.',
             ai_history_restored: 'Chat tiklandi',
+            feature_in_dev: 'Funksiya ishlab chiqilmoqda 🚧',
         },
 
         // ──────────── TURKISH ────────────
@@ -784,6 +787,7 @@ const i18n = {
             ai_history_title: '📜 Sohbet Geçmişi',
             ai_history_empty: 'Henüz geçmiş yok. Temizlenen sohbetler burada görünecektir.',
             ai_history_restored: 'Sohbet geri yüklendi',
+            feature_in_dev: 'Özellik geliştirme aşamasında 🚧',
         },
 
         // ──────────── SPANISH ────────────
@@ -964,6 +968,7 @@ const i18n = {
             ai_history_title: '📜 Historial de Chat',
             ai_history_empty: 'Aún no hay historial. Los chats borrados aparecerán aquí.',
             ai_history_restored: 'Chat restaurado',
+            feature_in_dev: 'Característica en desarrollo 🚧',
         },
 
         // ──────────── CHINESE ────────────
@@ -1144,6 +1149,7 @@ const i18n = {
             ai_history_title: '📜 聊天记录',
             ai_history_empty: '暂无记录。清除的聊天将显示在这里。',
             ai_history_restored: '聊天已恢复',
+            feature_in_dev: '功能开发中 🚧',
         }
     },
 
