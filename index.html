@@ -13,6 +13,10 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -286,6 +290,12 @@
                         </svg>
                         <span data-i18n="new_task">New Task</span>
                     </button>
+
+                    <!-- Cloud Sync Badge -->
+                    <div id="cloudSyncBadge" class="cloud-sync-badge hidden">
+                        <span class="sync-dot"></span>
+                        <span class="sync-text">☁️ Synced</span>
+                    </div>
 
                     <!-- User Profile Menu -->
                     <div class="profile-menu-container">
@@ -1128,6 +1138,7 @@
     </div>
 
     <script src="i18n.js"></script>
+    <script src="firebase.js"></script>
     <script src="app.js"></script>
 </body>
 

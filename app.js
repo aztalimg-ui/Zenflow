@@ -5,7 +5,13 @@
 // ──── DATA LAYER ────
 const Store = {
     get(key, def) { try { return JSON.parse(localStorage.getItem(`zf_${key}`)) ?? def; } catch { return def; } },
-    set(key, val) { localStorage.setItem(`zf_${key}`, JSON.stringify(val)); },
+    set(key, val) {
+        localStorage.setItem(`zf_${key}`, JSON.stringify(val));
+        // Async cloud sync (fire-and-forget)
+        if (typeof CloudSync !== 'undefined' && CloudSync.ready) {
+            CloudSync.save(key, val);
+        }
+    },
     tasks: () => Store.get('tasks', []),
     saveTasks: (t) => Store.set('tasks', t),
     categories: () => Store.get('categories', [
@@ -69,6 +75,13 @@ const app = {
             this.initPomoSettings();
             i18n.applyTranslations();
             this.initDeviceMode();
+            // Initialize cloud sync
+            if (typeof CloudSync !== 'undefined') {
+                CloudSync.init().then(() => {
+                    this.renderAll();
+                    if (this.currentView === 'calendar') this.renderCalendar();
+                });
+            }
         }, 100);
     },
 
