@@ -20,7 +20,9 @@ const Store = {
     streak: () => Store.get('streak', { count: 0, lastDate: null }),
     saveStreak: (s) => Store.set('streak', s),
     activity: () => Store.get('activity', {}),
-    saveActivity: (a) => Store.set('activity', a)
+    saveActivity: (a) => Store.set('activity', a),
+    aiThreads: () => Store.get('ai_threads', []),
+    saveAiThreads: (th) => Store.set('ai_threads', th)
 };
 
 // ──── UTILITY ────
@@ -66,7 +68,41 @@ const app = {
             this.initAI();
             this.initPomoSettings();
             i18n.applyTranslations();
+            this.initDeviceMode();
         }, 100);
+    },
+
+    // ──── DEVICE SWITCHER ────
+    initDeviceMode() {
+        const savedMode = Store.get('device_mode', 'desktop');
+        this.setDeviceMode(savedMode);
+
+        $$('.device-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const mode = e.currentTarget.dataset.device;
+                this.setDeviceMode(mode);
+            });
+        });
+    },
+
+    setDeviceMode(mode) {
+        document.body.classList.remove('view-mobile', 'view-tablet');
+        
+        if (mode === 'mobile') {
+            document.body.classList.add('view-mobile');
+        } else if (mode === 'tablet') {
+            document.body.classList.add('view-tablet');
+        }
+
+        $$('.device-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.device === mode);
+        });
+
+        Store.set('device_mode', mode);
+
+        if (this.currentView === 'analytics') {
+            setTimeout(() => this.updateCharts(), 300);
+        }
     },
 
     // ──── SPLASH ────
@@ -211,6 +247,51 @@ const app = {
         }));
         // Analytics period
         $('#analyticsPeriod')?.addEventListener('change', () => this.updateCharts());
+        
+        // Profile Menu Dropdown
+        const profileBtn = $('#profileBtn');
+        const profileDropdown = $('#profileDropdown');
+        if (profileBtn && profileDropdown) {
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+            
+            // Close dropdown when mouse leaves the dropdown
+            profileDropdown.addEventListener('mouseleave', () => {
+                profileDropdown.classList.add('hidden');
+            });
+            
+            // Close dropdown when an item is clicked
+            profileDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (item.getAttribute('href') === '#') {
+                        e.preventDefault();
+                    }
+                    if (item.id !== 'dropdownThemeToggle') {
+                        toast(i18n.t('feature_in_dev') || 'Feature in development 🚧', 'info');
+                    }
+                    // Theme toggle handles its own logic, but we still want to close the dropdown
+                    setTimeout(() => profileDropdown.classList.add('hidden'), 100);
+                });
+            });
+            
+            // Handle Theme toggle from inside dropdown
+            const popupThemeToggle = $('#dropdownThemeToggle');
+            if(popupThemeToggle) {
+                popupThemeToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleTheme();
+                });
+            }
+        }
     },
 
     toggleMobileSidebar() {
@@ -1111,8 +1192,17 @@ const app = {
                 toast(i18n.t('ai_key_saved'), 'success');
             }
         });
+        // History Modal
+        $('#aiHistoryBtn')?.addEventListener('click', () => {
+            this.aiRenderHistoryList();
+            $('#aiHistoryModal').classList.remove('hidden');
+        });
+        $('#aiHistoryClose')?.addEventListener('click', () => {
+            $('#aiHistoryModal').classList.add('hidden');
+        });
         // Clear chat
         $('#aiClearBtn').addEventListener('click', () => {
+            this.aiArchiveCurrentThread();
             this.aiMessages = [];
             localStorage.removeItem('zf_ai_history');
             this.aiRenderMessages();
@@ -1171,6 +1261,8 @@ const app = {
                 ? `\nUser's current tasks:\n${tasks.slice(0, 20).map(t => `- [${t.status}] ${t.title}${t.dueDate ? ' (due: ' + t.dueDate + ')' : ''} priority: ${t.priority}`).join('\n')}`
                 : '';
 
+            const currentDate = new Date().toISOString().split('T')[0];
+            const currentDayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
             const systemPrompt = `You are an AI productivity planner inside a task management app called ZenFlow. Your job is to create detailed, actionable plans when the user describes a goal. Format your responses using markdown:
 - Use ## for section headers
 - Use numbered lists for steps
@@ -1178,6 +1270,31 @@ const app = {
 - Suggest time estimates and priorities
 - Break complex goals into phases
 - Be concise but thorough
+
+IMPORTANT: Today's date is ${currentDate} (${currentDayName}).
+
+SCHEDULE AUTO-SYNC RULES:
+Whenever you create a daily plan, weekly plan, or any schedule with specific dates and times, you MUST also include a hidden structured block at the END of your response in EXACTLY this format:
+
+[SCHEDULE]
+DATE:YYYY-MM-DD|TIME:HH:MM-HH:MM|TITLE:task title here|PRIORITY:low/medium/high/critical
+DATE:YYYY-MM-DD|TIME:HH:MM-HH:MM|TITLE:another task|PRIORITY:medium
+[/SCHEDULE]
+
+- Use real calendar dates based on today being ${currentDate}.
+- PRIORITY must be exactly one of: low, medium, high, critical
+- For repeating tasks on specific weekdays, create a separate line for each date within the plan period.
+- Always include this block when the plan contains timed activities. This is critical for syncing with the user's calendar.
+
+IMPORTANT RULES FOR BUGS/ERRORS:
+If the user reports an error, bug, or technical problem:
+1. First, try to suggest troubleshooting steps.
+2. If it's a fundamental logic bug or unresolvable issue, explicitly create a bug report for the creator by outputting EXACTLY this format somewhere in your response:
+[BUG_REPORT]
+Title: [A short title of the bug]
+Description: [A brief description of what is broken and needs fixing]
+[/BUG_REPORT]
+
 Respond in the same language the user writes in.${taskContext}`;
 
             const apiMessages = [
@@ -1195,6 +1312,9 @@ Respond in the same language the user writes in.${taskContext}`;
             const reply = await this._aiCallAPI(apiKey, apiMessages, typingEl);
             this.aiMessages.push({ role: 'assistant', content: reply });
             localStorage.setItem('zf_ai_history', JSON.stringify(this.aiMessages));
+
+            // Auto-create tasks from schedule
+            this.aiAutoCreateTasks(reply);
         } catch (err) {
             const errorMsg = this._aiParseError(err);
             this.aiMessages.push({ role: 'assistant', content: errorMsg });
@@ -1332,8 +1452,89 @@ Respond in the same language the user writes in.${taskContext}`;
         msgArea.scrollTop = msgArea.scrollHeight;
     },
 
+    aiParseSchedule(text) {
+        const match = text.match(/\[SCHEDULE\]([\s\S]*?)\[\/SCHEDULE\]/i);
+        if (!match) return [];
+        const lines = match[1].trim().split('\n').filter(l => l.trim());
+        const items = [];
+        for (const line of lines) {
+            const parts = {};
+            line.split('|').forEach(seg => {
+                const [key, ...valParts] = seg.split(':');
+                if (key && valParts.length) {
+                    const k = key.trim().toUpperCase();
+                    const v = valParts.join(':').trim();
+                    parts[k] = v;
+                }
+            });
+            if (parts.DATE && parts.TITLE) {
+                items.push({
+                    date: parts.DATE,
+                    time: parts.TIME || '',
+                    title: parts.TITLE,
+                    priority: ['low', 'medium', 'high', 'critical'].includes((parts.PRIORITY || '').toLowerCase())
+                        ? parts.PRIORITY.toLowerCase() : 'medium'
+                });
+            }
+        }
+        return items;
+    },
+
+    aiAutoCreateTasks(reply) {
+        const scheduleItems = this.aiParseSchedule(reply);
+        if (scheduleItems.length === 0) return;
+
+        const tasks = Store.tasks();
+        let added = 0;
+
+        for (const item of scheduleItems) {
+            // Skip if a task with same title and date already exists
+            const exists = tasks.some(t => t.title === item.title && t.dueDate === item.date);
+            if (exists) continue;
+
+            const taskData = {
+                id: uid(),
+                title: item.time ? `${item.time} ${item.title}` : item.title,
+                description: '',
+                priority: item.priority,
+                status: 'todo',
+                dueDate: item.date,
+                category: null,
+                tags: ['ai-plan'],
+                subtasks: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            tasks.unshift(taskData);
+            added++;
+        }
+
+        if (added > 0) {
+            Store.saveTasks(tasks);
+            this.renderAll();
+            toast(`📅 ${i18n.t('ai_schedule_added') || `${added} tasks added to calendar!`}`, 'success');
+        }
+    },
+
     aiRenderMarkdown(text) {
         return text
+            // Strip SCHEDULE blocks from visible output
+            .replace(/\[SCHEDULE\][\s\S]*?\[\/SCHEDULE\]/gi, '')
+            // Bug Report blocks
+            .replace(/\[BUG_REPORT\]([\s\S]*?)\[\/BUG_REPORT\]/gi, (match, content) => {
+                const titleMatch = content.match(/Title:\s*(.+)/i);
+                const descMatch = content.match(/Description:\s*([\s\S]+)/i);
+                const title = titleMatch ? titleMatch[1].trim() : 'System Error';
+                const desc = descMatch ? descMatch[1].trim() : content.trim();
+                return `<div class="ai-bug-report">
+                    <div class="bug-report-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>BUG TICKET CREATED & SENT TO DEVELOPER</span>
+                    </div>
+                    <div class="bug-report-title">${title}</div>
+                    <div class="bug-report-desc">${desc}</div>
+                </div>`;
+            })
             // Code blocks
             .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
             // Inline code
@@ -1357,6 +1558,76 @@ Respond in the same language the user writes in.${taskContext}`;
             .replace(/\n/g, '<br>')
             .replace(/^(.+)/, '<p>$1')
             .replace(/(.+)$/, '$1</p>');
+    },
+
+    aiArchiveCurrentThread() {
+        if (!this.aiMessages || this.aiMessages.length === 0) return;
+        const threads = Store.aiThreads();
+        const firstUserMsg = this.aiMessages.find(m => m.role === 'user');
+        const title = firstUserMsg ? firstUserMsg.content.substring(0, 40) + (firstUserMsg.content.length > 40 ? '...' : '') : 'New Chat';
+        
+        threads.unshift({
+            id: uid(),
+            title: title,
+            date: new Date().toISOString(),
+            messages: [...this.aiMessages]
+        });
+        Store.saveAiThreads(threads);
+    },
+
+    aiRenderHistoryList() {
+        const list = $('#aiHistoryList');
+        const empty = $('#aiHistoryEmpty');
+        const threads = Store.aiThreads();
+        
+        if (threads.length === 0) {
+            list.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+        }
+        
+        empty.classList.add('hidden');
+        list.innerHTML = threads.map(th => `
+            <div class="ai-history-item" onclick="app.aiRestoreThread('${th.id}')">
+                <div class="ai-history-info">
+                    <div class="ai-history-title">${this.esc(th.title)}</div>
+                    <div class="ai-history-date">${formatDate(th.date.split('T')[0])}</div>
+                </div>
+                <div class="ai-history-actions" onclick="event.stopPropagation()">
+                    <button class="icon-btn" onclick="app.aiDeleteThread('${th.id}')" aria-label="Delete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    aiRestoreThread(id) {
+        const threads = Store.aiThreads();
+        const thIndex = threads.findIndex(t => t.id === id);
+        if (thIndex === -1) return;
+        
+        // Archive current if it has messages
+        this.aiArchiveCurrentThread();
+        
+        const th = threads[thIndex];
+        this.aiMessages = [...th.messages];
+        localStorage.setItem('zf_ai_history', JSON.stringify(this.aiMessages));
+        
+        // Remove restored thread from history
+        threads.splice(thIndex, 1);
+        Store.saveAiThreads(threads);
+        
+        $('#aiHistoryModal').classList.add('hidden');
+        this.aiRenderMessages();
+        toast(i18n.t('ai_history_restored') || 'Chat restored', 'success');
+    },
+
+    aiDeleteThread(id) {
+        let threads = Store.aiThreads();
+        threads = threads.filter(t => t.id !== id);
+        Store.saveAiThreads(threads);
+        this.aiRenderHistoryList();
     },
 
     // ──── HELPERS ────
