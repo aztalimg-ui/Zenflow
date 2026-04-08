@@ -657,6 +657,8 @@ body {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     gap: 16px;
+    position: relative;
+    z-index: 100;
 }
 
 .topbar-left {
@@ -895,6 +897,132 @@ body {
     color: var(--text-secondary);
     font-size: 0.95rem;
     margin-top: 4px;
+}
+
+/* ══════════════════════════════════════════
+   USER PROFILE DROPDOWN
+   ══════════════════════════════════════════ */
+.profile-menu-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profile-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    padding: 0;
+    border: 2px solid transparent;
+    transition: all var(--transition-medium);
+    background: var(--bg-tertiary);
+}
+
+.profile-btn:hover {
+    border-color: var(--border-primary);
+    transform: scale(1.05);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 280px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    z-index: 9999;
+    padding: 8px 0;
+    
+    /* Animation state */
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: all var(--transition-medium);
+    transform-origin: top right;
+}
+
+body[data-theme="light"] .profile-dropdown {
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+.profile-dropdown.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+    pointer-events: none;
+}
+
+.profile-dropdown-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.dropdown-item svg {
+    color: var(--text-tertiary);
+    transition: color var(--transition-fast);
+}
+
+.dropdown-item:hover svg {
+    color: var(--text-primary);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--border-light);
+    margin: 8px 0;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-left: auto;
+}
+
+.status-dot.blue {
+    background: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+.chevron-right {
+    margin-left: auto;
+    width: 16px;
+    height: 16px;
+    opacity: 0.5;
+}
+
+.dropdown-item:hover .chevron-right {
+    opacity: 1;
+    transform: translateX(2px);
 }
 
 .view-actions {
@@ -1311,6 +1439,7 @@ body {
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1772,6 +1901,7 @@ body {
     font-family: var(--font-mono);
     outline: none;
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .pomo-setting-input::-webkit-outer-spin-button,
@@ -2234,6 +2364,8 @@ body {
 /* ══════════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════════ */
+
+/* ──── TABLET (max-width: 1024px) ──── */
 @media (max-width: 1024px) {
     .dashboard-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -2263,8 +2395,25 @@ body {
     .topbar-stats {
         display: none;
     }
+
+    .cal-day {
+        min-height: 65px;
+    }
+
+    .pomodoro-card {
+        padding: 36px 28px;
+    }
+
+    .view-title {
+        font-size: 1.5rem;
+    }
+
+    .filter-group {
+        flex-wrap: wrap;
+    }
 }
 
+/* ──── MOBILE (max-width: 768px) ──── */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
@@ -2295,11 +2444,21 @@ body {
     }
 
     .topbar {
-        padding: 0 16px;
+        padding: 0 12px;
+        gap: 8px;
     }
 
     .search-kbd {
         display: none;
+    }
+
+    .search-box {
+        padding: 6px 12px;
+        max-width: 100%;
+    }
+
+    .search-box input {
+        font-size: 0.85rem;
     }
 
     .splash-title {
@@ -2315,27 +2474,389 @@ body {
     }
 
     .pomodoro-card {
-        padding: 32px 24px;
+        padding: 24px 16px;
+    }
+
+    .pomodoro-timer-ring {
+        width: 220px;
+        height: 220px;
+        margin: 0 auto 24px;
+    }
+
+    .timer-display {
+        font-size: 2.8rem;
+    }
+
+    .pomodoro-tabs {
+        flex-wrap: wrap;
+    }
+
+    .pomo-tab {
+        font-size: 0.78rem;
+        padding: 8px 10px;
+    }
+
+    .pomo-settings-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .pomodoro-header-row {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
     }
 
     .stat-card {
         flex-direction: column;
         text-align: center;
     }
+
+    .stat-card-value {
+        font-size: 1.4rem;
+    }
+
+    .view-title {
+        font-size: 1.3rem;
+    }
+
+    .view-header {
+        gap: 10px;
+    }
+
+    .view-actions {
+        width: 100%;
+    }
+
+    .filter-select {
+        min-width: 100px;
+        font-size: 0.8rem;
+        padding: 8px 10px;
+    }
+
+    /* Calendar mobile */
+    .cal-day {
+        min-height: 48px;
+        padding: 4px;
+    }
+
+    .cal-day-number {
+        font-size: 0.72rem;
+    }
+
+    .cal-task-label {
+        font-size: 0.55rem;
+        padding: 1px 3px;
+    }
+
+    .cal-header-cell {
+        font-size: 0.68rem;
+        padding: 6px 2px;
+        letter-spacing: 0.5px;
+    }
+
+    .cal-month-title {
+        font-size: 1rem;
+        min-width: 140px;
+    }
+
+    .calendar-container {
+        padding: 12px;
+    }
+
+    /* Kanban mobile */
+    .kanban-column {
+        max-height: 350px;
+    }
+
+    .task-card {
+        padding: 12px;
+    }
+
+    .task-card-actions {
+        opacity: 1;
+    }
+
+    /* Modal mobile */
+    .modal {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: var(--radius-lg);
+        margin: 8px;
+    }
+
+    .modal-overlay {
+        padding: 8px;
+    }
+
+    .modal-header {
+        padding: 16px 16px 0;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+
+    .modal-footer {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Profile dropdown mobile */
+    .profile-dropdown {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    /* Toast mobile */
+    .toast-container {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+    }
+
+    .toast {
+        max-width: 100%;
+    }
+
+    /* AI planner mobile */
+    .ai-header {
+        padding: 14px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .ai-header-left {
+        gap: 10px;
+    }
+
+    .ai-avatar {
+        width: 36px;
+        height: 36px;
+    }
+
+    .ai-title {
+        font-size: 1.1rem;
+    }
+
+    .ai-messages {
+        padding: 16px;
+    }
+
+    .ai-input-area {
+        padding: 12px 16px 8px;
+    }
+
+    .ai-msg {
+        max-width: 95%;
+    }
+
+    .ai-welcome {
+        min-height: 200px;
+        padding: 24px 16px;
+    }
+
+    .ai-welcome h2 {
+        font-size: 1.2rem;
+    }
+
+    .ai-suggestions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ai-key-panel {
+        padding: 0 16px;
+    }
 }
 
+/* ──── SMALL MOBILE (max-width: 480px) ──── */
 @media (max-width: 480px) {
     .splash-title {
         font-size: 2rem;
+    }
+
+    .splash-tagline {
+        font-size: 0.95rem;
     }
 
     .topbar-right .btn span {
         display: none;
     }
 
+    .topbar-right .btn {
+        padding: 8px;
+    }
+
     .pomodoro-stats {
         flex-direction: column;
         gap: 12px;
+    }
+
+    .pomodoro-timer-ring {
+        width: 180px;
+        height: 180px;
+    }
+
+    .timer-display {
+        font-size: 2.2rem;
+    }
+
+    .pomo-settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pomodoro-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pomodoro-controls .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .pomodoro-task-select {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .pomodoro-task-select .filter-select {
+        width: 100%;
+    }
+
+    /* Calendar small mobile */
+    .cal-day {
+        min-height: 36px;
+        padding: 2px;
+    }
+
+    .cal-task-label {
+        display: none;
+    }
+
+    .cal-task-more {
+        display: none;
+    }
+
+    .cal-day.has-tasks::after {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--indigo);
+        margin: 2px auto 0;
+    }
+
+    .view-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .view-actions {
+        width: 100%;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* AI small mobile */
+    .ai-header-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .ai-suggestion-chip {
+        width: 100%;
+        text-align: center;
+    }
+
+    .ai-connect-steps {
+        gap: 8px;
+    }
+
+    .ai-step-text {
+        font-size: 0.78rem;
+    }
+}
+
+/* ──── ULTRA SMALL (max-width: 360px) ──── */
+@media (max-width: 360px) {
+    .view {
+        padding: 10px;
+    }
+
+    .topbar {
+        padding: 0 8px;
+    }
+
+    .search-box {
+        padding: 5px 10px;
+    }
+
+    .dash-card {
+        padding: 16px;
+    }
+
+    .stat-card-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .stat-card-value {
+        font-size: 1.2rem;
+    }
+
+    .pomodoro-timer-ring {
+        width: 150px;
+        height: 150px;
+    }
+
+    .timer-display {
+        font-size: 1.8rem;
+    }
+}
+
+/* ──── LANDSCAPE PHONE ──── */
+@media (max-height: 500px) and (orientation: landscape) {
+    .pomodoro-container {
+        min-height: auto;
+    }
+
+    .pomodoro-timer-ring {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 16px;
+    }
+
+    .timer-display {
+        font-size: 2rem;
+    }
+
+    .pomodoro-card {
+        padding: 16px;
+    }
+
+    .pomodoro-controls {
+        margin-bottom: 12px;
+    }
+
+    .view {
+        padding: 12px;
     }
 }
 
@@ -2939,6 +3460,45 @@ body {
     margin: 4px 0;
 }
 
+/* AI Bug Report Card */
+.ai-bug-report {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin: 12px 0;
+    border-left: 4px solid #ef4444; /* red/danger */
+}
+
+.bug-report-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ef4444;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.bug-report-header svg {
+    flex-shrink: 0;
+}
+
+.bug-report-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.bug-report-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
 /* Typing indicator */
 .typing-dots {
     display: flex;
@@ -3052,21 +3612,242 @@ body {
     margin-top: 6px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .ai-header {
-        padding: 14px 16px;
+/* ══════════════════════════════════════════
+   AI HISTORY
+   ══════════════════════════════════════════ */
+.ai-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.ai-history-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ai-history-item:hover {
+    border-color: var(--border-primary);
+    background: var(--bg-tertiary);
+    transform: translateY(-2px);
+}
+
+.ai-history-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.ai-history-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ai-history-date {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+}
+
+.ai-history-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.ai-history-item:hover .ai-history-actions {
+    opacity: 1;
+}
+
+
+/* ══════════════════════════════════════════
+   DEVICE SWITCHER
+   ══════════════════════════════════════════ */
+.device-switcher-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+/* Hide when splash screen is active (#app is hidden) */
+#app.hidden ~ .device-switcher-container {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+
+/* The expanding menu */
+.device-switcher-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(30, 30, 35, 0.85); /* Transparent dark background */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px;
+    border-radius: 100px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Hidden state */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(20px) scale(0.9);
+    pointer-events: none;
+}
+
+body[data-theme="light"] .device-switcher-menu {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Expand on hover of the container */
+.device-switcher-container:hover .device-switcher-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Main FAB Button */
+.device-fab {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all var(--transition-medium);
+    z-index: 2; /* Keep above menu */
+}
+
+.device-fab:hover {
+    background: var(--bg-tertiary);
+    transform: scale(1.05);
+}
+
+body[data-theme="light"] .device-fab {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Device toggle buttons inside menu */
+.device-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-tertiary);
+    transition: all var(--transition-fast);
+}
+
+.device-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.device-btn.active {
+    background: var(--indigo);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* ══════════════════════════════════════════
+   DEVICE VIEW MODES (Only on Desktop)
+   ══════════════════════════════════════════ */
+@media (min-width: 1024px) {
+    body.view-mobile, body.view-tablet {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #000;
     }
 
-    .ai-messages {
-        padding: 16px;
+    body.view-mobile #app, body.view-tablet #app {
+        position: relative;
+        box-shadow: 0 0 0 12px #333, 0 20px 60px rgba(0,0,0,0.8);
+        border-radius: 40px;
+        overflow: hidden;
+        margin: auto;
+        max-height: 90vh; /* Don't overlap with switcher too badly */
     }
 
-    .ai-input-area {
-        padding: 12px 16px 8px;
+    /* Mobile specific dimensions (iPhone roughly) */
+    body.view-mobile #app {
+        width: 375px;
+        height: 812px;
     }
 
-    .ai-msg {
-        max-width: 95%;
+    /* Tablet specific dimensions (iPad roughly) */
+    body.view-tablet #app {
+        width: 768px;
+        height: 1024px;
+    }
+
+    /* Simulated screen notch/camera for extra detail */
+    body.view-mobile #app::before, body.view-tablet #app::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        z-index: 9999;
+    }
+
+    body.view-mobile #app::before {
+        width: 120px;
+        height: 25px;
+        border-radius: 0 0 12px 12px;
+    }
+
+    body.view-tablet #app::before {
+        top: 5px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        box-shadow: 20px 0 0 2px #333; /* Camera & sensor */
+    }
+
+    /* Disable body scrolling when in device mode */
+    body.view-mobile, body.view-tablet {
+        overflow: hidden;
+    }
+}
+
+/* Ensure app is full size normally or on actual mobile devices */
+body #app {
+    width: 100%;
+    height: 100vh;
+}
+
+/* Hide device switcher on actual mobile devices */
+@media (max-width: 1023px) {
+    .device-switcher-container {
+        display: none !important;
     }
 }
