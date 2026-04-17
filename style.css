@@ -3851,3 +3851,56 @@ body #app {
         display: none !important;
     }
 }
+
+/* ══════════════════════════════════════════
+   CLOUD SYNC BADGE
+   ══════════════════════════════════════════ */
+.cloud-sync-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-light);
+    margin-top: 8px;
+}
+
+.cloud-sync-badge.hidden {
+    display: none;
+}
+
+.sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-tertiary);
+    flex-shrink: 0;
+    transition: background 0.3s ease;
+}
+
+.sync-dot.connected {
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.sync-dot.syncing {
+    background: #f59e0b;
+    animation: syncPulse 1s ease-in-out infinite;
+}
+
+.sync-dot.error {
+    background: #ef4444;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes syncPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.sync-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

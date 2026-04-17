@@ -235,6 +235,12 @@ const i18n = {
             ai_history_restored: 'Chat restored',
             ai_schedule_added: 'Plan synced to calendar! 📅',
             feature_in_dev: 'Feature in development 🚧',
+
+            // Cloud Sync
+            sync_connected: '☁️ Synced',
+            sync_syncing: '⏳ Syncing...',
+            sync_error: '⚠️ Offline',
+            sync_disconnected: '☁️ Disconnected',
         },
 
         // ──────────── RUSSIAN ────────────
@@ -428,6 +434,12 @@ const i18n = {
             ai_history_restored: 'Чат восстановлен',
             ai_schedule_added: 'План добавлен в календарь! 📅',
             feature_in_dev: 'Функция в разработке 🚧',
+
+            // Cloud Sync
+            sync_connected: '☁️ Синхронизировано',
+            sync_syncing: '⏳ Синхронизация...',
+            sync_error: '⚠️ Нет сети',
+            sync_disconnected: '☁️ Отключено',
         },
 
         // ──────────── UZBEK ────────────
@@ -610,6 +622,12 @@ const i18n = {
             ai_history_restored: 'Chat tiklandi',
             ai_schedule_added: 'Reja taqvimga qo\'shildi! 📅',
             feature_in_dev: 'Funksiya ishlab chiqilmoqda 🚧',
+
+            // Cloud Sync
+            sync_connected: '☁️ Sinxronlangan',
+            sync_syncing: '⏳ Sinxronlanmoqda...',
+            sync_error: '⚠️ Oflayn',
+            sync_disconnected: '☁️ Uzilgan',
         },
 
         // ──────────── TURKISH ────────────
@@ -792,6 +810,12 @@ const i18n = {
             ai_history_restored: 'Sohbet geri yüklendi',
             ai_schedule_added: 'Plan takvime eklendi! 📅',
             feature_in_dev: 'Özellik geliştirme aşamasında 🚧',
+
+            // Cloud Sync
+            sync_connected: '☁️ Senkronize',
+            sync_syncing: '⏳ Senkronize ediliyor...',
+            sync_error: '⚠️ Çevrimdışı',
+            sync_disconnected: '☁️ Bağlantı kesildi',
         },
 
         // ──────────── SPANISH ────────────
@@ -974,6 +998,12 @@ const i18n = {
             ai_history_restored: 'Chat restaurado',
             ai_schedule_added: '¡Plan sincronizado al calendario! 📅',
             feature_in_dev: 'Característica en desarrollo 🚧',
+
+            // Cloud Sync
+            sync_connected: '☁️ Sincronizado',
+            sync_syncing: '⏳ Sincronizando...',
+            sync_error: '⚠️ Sin conexión',
+            sync_disconnected: '☁️ Desconectado',
         },
 
         // ──────────── CHINESE ────────────
@@ -1156,6 +1186,12 @@ const i18n = {
             ai_history_restored: '聊天已恢复',
             ai_schedule_added: '计划已同步到日历！📅',
             feature_in_dev: '功能开发中 🚧',
+
+            // Cloud Sync
+            sync_connected: '☁️ 已同步',
+            sync_syncing: '⏳ 同步中...',
+            sync_error: '⚠️ 离线',
+            sync_disconnected: '☁️ 已断开',
         }
     },
 
